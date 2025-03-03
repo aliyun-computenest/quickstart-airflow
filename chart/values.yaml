@@ -65,7 +65,7 @@ containerLifecycleHooks: {}
 airflowHome: /opt/airflow
 
 # Default airflow repository -- overridden by all the specific images below
-defaultAirflowRepository: apache/airflow
+defaultAirflowRepository: compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/1853370294850618/apache/airflow
 
 # Default airflow tag to deploy
 defaultAirflowTag: "2.10.5"
@@ -104,11 +104,11 @@ images:
     tag: ~
     pullPolicy: IfNotPresent
   statsd:
-    repository: quay.io/prometheus/statsd-exporter
+    repository: compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/1853370294850618/prometheus/statsd-exporter
     tag: v0.28.0
     pullPolicy: IfNotPresent
   redis:
-    repository: redis
+    repository: compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/1853370294850618/redis
     # Redis is limited to 7.2-bookworm due to licencing change
     # https://redis.io/blog/redis-adopts-dual-source-available-licensing/
     tag: 7.2-bookworm
@@ -2629,6 +2629,8 @@ postgresql:
     postgresPassword: postgres
     username: ""
     password: ""
+  image:
+    registry: compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/1853370294850618
 
 # Config settings to go into the mounted airflow.cfg
 #
