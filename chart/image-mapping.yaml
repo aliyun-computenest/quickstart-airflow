@@ -1,0 +1,5 @@
+image-mapping:
+- apache/airflow:2.10.5: compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/1563457855438522/apache/airflow:2.10.5
+- docker.io/bitnami/postgresql:16.1.0-debian-11-r15: compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/1563457855438522/bitnami/postgresql:16.1.0-debian-11-r15
+- quay.io/prometheus/statsd-exporter:v0.28.0: compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/1563457855438522/prometheus/statsd-exporter:v0.28.0
+- redis:7.2-bookworm: compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/1563457855438522/redis:7.2-bookworm

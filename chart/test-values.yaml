@@ -1,0 +1,15 @@
+workers:
+  persistence:
+    storageClassName: alicloud-disk-topology-alltype
+triggerer:
+  persistence:
+    storageClassName: alicloud-disk-topology-alltype
+redis:
+  persistence:
+    storageClassName: alicloud-disk-topology-alltype
+    size: 20Gi
+postgresql:
+  primary:
+    persistence:
+      storageClass: alicloud-disk-topology-alltype
+      size: 20Gi
