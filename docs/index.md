@@ -1,11 +1,11 @@
-# Harbor计算巢快速部署
+# Airflow计算巢快速部署
 
 >**免责声明：**本服务由第三方提供，我们尽力确保其安全性、准确性和可靠性，但无法保证其完全免于故障、中断、错误或攻击。因此，本公司在此声明：对于本服务的内容、准确性、完整性、可靠性、适用性以及及时性不作任何陈述、保证或承诺，不对您使用本服务所产生的任何直接或间接的损失或损害承担任何责任；对于您通过本服务访问的第三方网站、应用程序、产品和服务，不对其内容、准确性、完整性、可靠性、适用性以及及时性承担任何责任，您应自行承担使用后果产生的风险和责任；对于因您使用本服务而产生的任何损失、损害，包括但不限于直接损失、间接损失、利润损失、商誉损失、数据损失或其他经济损失，不承担任何责任，即使本公司事先已被告知可能存在此类损失或损害的可能性；我们保留不时修改本声明的权利，因此请您在使用本服务前定期检查本声明。如果您对本声明或本服务存在任何问题或疑问，请联系我们。
 
 
 ## 概述
 
-Apache Airflow 是一个开源的工作流管理平台，用于编写、调度和监控工作流（Workflows）。它最初由 Airbnb 开发，并于 2016 年捐赠给 Apache 软件基金会。Airflow 的核心理念是通过代码来定义工作流，使得工作流的管理和维护更加灵活和可扩展。
+Apache Airflow 是一个开源的工作流管理平台，用于编写、调度和监控工作流（Workflows）。它最初由 Airbnb 开发，并于 2016 年捐赠给 Apache 软件基金会。Airflow 的核心理念是通过代码来定义工作流，使得工作流的管理和维护更加灵活和可扩展, github社区地址见[链接](https://github.com/apache/airflow)。
 
 ## 计费说明
 
@@ -56,18 +56,21 @@ Apache Airflow 是一个开源的工作流管理平台，用于编写、调度�
 
 ## 部署流程
 
-1.访问Airflow服务[部署链接](https://computenest.console.aliyun.com/service/instance/create/cn-hangzhou?type=user&ServiceId=service-2b7575c1f3d74026aec5)
+1.访问Airflow服务[部署链接](https://computenest.console.aliyun.com/service/instance/create/default?type=user&ServiceName=Airflow%E7%A4%BE%E5%8C%BA%E7%89%88)
 ，按提示填写部署参数, 这里可以根据需求对Chart Values进行修改：
 
 ![image.png](1.png)
 
 2.确认订单完成后同意服务协议并点击**立即创建**进入部署阶段。
 
-![image.png](4.png)
+![image.png](2.png)
 
-4.等待部署完成后进入服务实例管理。
+3.在服务实例列表中可以看到服务实例具体部署进度。
 
-5.在控制台找到Harbor服务链接并访问。
+![img.png](3.png)
 
-![image.png](5.png)
-![image.png](6.png)
+4.部署完成后在控制台找到Airflow服务链接并访问, 初始账号、密码默认都为admin。
+
+![img.png](4.png)
+![img_1.png](5.png)
+![img_2.png](6.png)
