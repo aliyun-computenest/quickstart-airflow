@@ -1,0 +1,36 @@
+ChartValues:
+  triggerer:
+    persistence:
+      storageClassName: alicloud-disk-topology-alltype
+  postgresql:
+    primary:
+      persistence:
+        storageClass: alicloud-disk-topology-alltype
+        size: 20Gi
+  webserver:
+    service:
+      type: LoadBalancer
+    defaultUser:
+      password: admin
+      username: admin
+  workers:
+    persistence:
+      storageClassName: alicloud-disk-topology-alltype
+  redis:
+    persistence:
+      size: 20Gi
+      storageClassName: alicloud-disk-topology-alltype
+HelmChartPath: chart
+RuntimeType: Kubernetes
+OutputCmd: |-
+  export SERVICE_IP=$(kubectl get svc --namespace ${Namespace}  airflow-webserver -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo "Visit URL: http://$SERVICE_IP:8080/"
+ServiceType: private
+ArtifactSourceType: HelmChart
+ServiceBuildRegion: ap-southeast-1
+RepoName: aliyun-computenest/quickstart-airflow
+RegionId: cn-hangzhou
+OutputType: OutputCommand
+Owner: yehanyh
+Branch: main
+Platform: github
