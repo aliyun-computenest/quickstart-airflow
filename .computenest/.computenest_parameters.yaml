@@ -1,1 +1,12 @@
-{"RepoName":"aliyun-computenest/quickstart-airflow","RegionId":"cn-hangzhou","Owner":"yehanyh","Branch":"main","Platform":"github"}
+ChartValues: {}
+HelmChartPath: chart
+RuntimeType: Kubernetes
+ServiceType: private
+ArtifactSourceType: HelmChart
+ServiceBuildRegion: ap-southeast-1
+RepoName: aliyun-computenest/quickstart-airflow
+RegionId: cn-hangzhou
+OutputType: HelmNotes
+Owner: yehanyh
+Branch: main
+Platform: github

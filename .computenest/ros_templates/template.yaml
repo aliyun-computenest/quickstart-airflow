@@ -400,7 +400,7 @@ Parameters:
     Label:
       en: Chart values
       zh-cn: Chart values
-    Default: '{"triggerer": {"persistence": {"storageClassName": "alicloud-disk-topology-alltype"}}, "postgresql": {"primary": {"persistence": {"storageClass": "alicloud-disk-topology-alltype", "size": "20Gi"}}}, "migrateDatabaseJob": {"useHelmHooks": false, "applyCustomEnv": false}, "createUserJob": {"useHelmHooks": false, "applyCustomEnv": false}, "webserver": {"service": {"type": "LoadBalancer"}, "defaultUser": {"password": "admin", "username": "admin"}}, "workers": {"persistence": {"storageClassName": "alicloud-disk-topology-alltype"}}, "redis": {"persistence": {"size": "20Gi", "storageClassName": "alicloud-disk-topology-alltype"}}}'
+    Default: '{}'
 Conditions:
   CreateClusterCondition:
     Fn::Or:
@@ -498,9 +498,6 @@ Resources:
       Namespace:
         Ref: 'ALIYUN::StackName'
       ReleaseName: airflow
-      OutputCmd: |
-        export SERVICE_IP=$(kubectl get svc --namespace ${Namespace}  airflow-webserver -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-        echo "http://$SERVICE_IP:8080/"
 Outputs:
   Instruction:
     Description:
