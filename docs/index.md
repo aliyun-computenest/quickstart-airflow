@@ -20,26 +20,6 @@ Apache Airflow 是一个开源的工作流管理平台，用于编写、调度�
 
 <img src="Architecture.png" width="1500" height="700" align="bottom"/>
 
-## 参数说明
-
-| 参数组          | 参数项          | 说明                                               |
-|--------------|--------------|--------------------------------------------------|
-| 服务实例         | 服务实例名称       | 长度不超过64个字符，必须以英文字母开头，可包含数字、英文字母、短划线（-）和下划线（_）    |
-|              | 地域           | 服务实例部署的地域                                        |
-| 容器集群选项       | 集群选项         | 是否新建集群或使用已有集群                                    |                                          |
-| 付费类型配置       | 付费类型         | 资源的计费类型：按量付费和包年包月                                |
-| Kubernetes配置 | Worker节点规格   | ACK集群节点规格                                        |
-|              | 实例节点数        | ACK集群节点个数                                        |
-|              | Worker 系统盘磁盘类型 | ACK集群节点挂载系统盘类型                                   |
-|              | Worker节点系统盘大小(GB) | ACK集群节点挂载系统盘大小                                   |
-|              | ack网络插件      | Flannel 或 Terway                                 |
-|              | Service CIDR | 不能与 VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复。创建成功后不能修改 |
-| Helm配置       | Chart values| helm部署参数内容                                       |
-| 基础配置         | 可用区| 节点部署所在可用区                                        |
-|              | 选择已有/新建的专有网络| 资源所在专有网路                                         |
-|              | 专有网络IPv4网段| 专业网络IPv4网段                                       |                                          |
-|              | 交换机子网网段| 必须属于VPC的子网段。                                     |  
-
 ## RAM账号所需权限
 
 部署Airflow，需要对部分阿里云资源进行访问和创建操作。因此您的账号需要包含如下资源的权限。
@@ -57,20 +37,116 @@ Apache Airflow 是一个开源的工作流管理平台，用于编写、调度�
 ## 部署流程
 
 1.访问Airflow服务[部署链接](https://computenest.console.aliyun.com/service/instance/create/default?type=user&ServiceName=Airflow%E7%A4%BE%E5%8C%BA%E7%89%88)
-，按提示填写部署参数, 这里可以根据需求对Chart Values进行修改：
+，按提示填写部署参数, 这里先进行容器集群设置，可以选择创建容器集群，也支持已有集群部署，这里新建ACK集群部署, 填入新建ACK集群所需的参数：
 
-![image.png](1.png)
+![img_2.png](img_2.png)
+![img_3.png](img_3.png)
 
-2.确认订单完成后同意服务协议并点击**立即创建**进入部署阶段。
+2.然后设置存放DAG文件的Git仓库配置，本服务采用Git仓库保存DAG文件的方式。
+![img_4.png](img_4.png)
 
-![image.png](2.png)
+3.设置airflow web登录的账号和密码。
+![img_5.png](img_5.png)
 
-3.在服务实例列表中可以看到服务实例具体部署进度。
+4.设置ACK集群部署的网络设置，这里可以选择已有的Vpc和VSwitch，也可以选择新建Vpc和VSwitch。
+![img_6.png](img_6.png)
+
+5.确认订单完成后同意服务协议并点击**立即创建**进入部署阶段。
+
+![img_7.png](img_7.png)
+
+6.在服务实例列表中可以看到服务实例具体部署进度。
 
 ![img.png](3.png)
 
-4.部署完成后在控制台找到Airflow服务链接并访问, 初始账号、密码默认都为admin。
+7.部署完成后在控制台找到Airflow服务链接并访问, 初始账号、密码为创建服务实例设置的值。
 
 ![img.png](4.png)
 ![img_1.png](5.png)
 ![img_2.png](6.png)
+
+## 使用方式
+上面服务实例已经部署完成，那么怎么运行我们定义好的DAG工作流呢，这里主要依赖git仓库去做同步，
+我们可以把写好的DAG文件提交到创建服务实例时所准备的git仓库中，然后airflow-scheduler组件会进行同步，
+web上就能看到我们定义好的DAG文件，然后点击run按钮就可以运行DAG文件了。
+
+下面以一个简单的DAG文件为例，展示如何在airflow中进行运行DAG。
+
+1.在git仓库中创建DAG文件，文件名为`hello_world_dag.py`，里面有三个任务，会依次执行：
+- 打印"Hello"
+- 打印"World"
+- 休眠300秒
+```python
+import time
+from datetime import timedelta
+
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from airflow.utils.dates import days_ago
+
+# 定义默认参数
+default_args = {
+    'owner': 'airflow',              # DAG 的所有者
+    'start_date': days_ago(1),       # DAG 的开始时间（1 天前）
+    'retries': 1,                    # 任务失败时的重试次数
+    'retry_delay': timedelta(minutes=5),  # 重试间隔
+}
+
+# 定义 DAG 对象
+with DAG(
+    dag_id='hello_world_dag',        # DAG 的唯一标识符
+    default_args=default_args,       # 使用默认参数
+    schedule_interval='@daily',      # 每天运行一次
+    catchup=False,                   # 是否补跑历史任务
+) as dag:
+
+    # 定义第一个任务：打印 "Hello"
+    def print_hello():
+        print("Hello")
+
+    task_hello = PythonOperator(
+        task_id='print_hello',        # 任务的唯一标识符
+        python_callable=print_hello,  # 调用的 Python 函数
+    )
+
+    # 定义第二个任务：打印 "World"
+    def print_world():
+        print("World")
+
+    task_world = PythonOperator(
+        task_id='print_world',
+        python_callable=print_world,
+    )
+
+    # 定义一个休眠任务
+    def sleep_task():
+        print("Task is sleeping for 300 seconds...")
+        time.sleep(300)  # 休眠 300 秒
+        print("Task woke up!")
+
+    sleep_operator = PythonOperator(
+        task_id='sleep_task',
+        python_callable=sleep_task,
+    )
+
+    # 设置任务依赖关系
+    task_hello >> task_world >> sleep_operator
+```
+2.提交DAG文件到git仓库中，然后去web端查看，可以看到对应的DAG，这个过程会有延时，目前设置的是每10s同步一次。
+![img_8.png](img_8.png)
+
+3.执行这个DAG，点击run按钮，点击进行，可以看到执行记录，点击Graph, 可以看到具体执行步骤，
+可以看到print_hello和print_world都已经执行完了，sleep_task还在执行中，这个功能确实很强大。
+![img_9.png](img_9.png)
+![img_10.png](img_10.png)
+4.点击还在执行中的sleep_task，可以在Logs里看到输出信息，里面输出了会sleep 300秒，可见在正常执行。
+![img_11.png](img_11.png)
+
+通过上面这个实例，可以看出airflow整体功能还是很强大的，可以清楚的看到DAG的执行情况，并且将每一步的
+执行过程都以图形化的方式显示出来，里面还有执行时间和日志，用来做工作流还是很好用的。
+
+## 常见问题答疑
+1.git-sync容器启动失败
+> 由于需要访问git仓库，国内机器可能无法访问github，可以选择海外地域进行部署，同时也要注意，git仓库非公开
+> 的情况下，需要提供访问秘钥，需要自行对部署的helm release进行升级修改。
+
