@@ -122,7 +122,7 @@ images:
     tag: airflow-pgbouncer-exporter-2024.06.18-0.17.0
     pullPolicy: IfNotPresent
   gitSync:
-    repository: registry.k8s.io/git-sync/git-sync
+    repository: compute-nest-registry.cn-hangzhou.cr.aliyuncs.com/computenest/git-sync/git-sync
     tag: v4.3.0
     pullPolicy: IfNotPresent
 
