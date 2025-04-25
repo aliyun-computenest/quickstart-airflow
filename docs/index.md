@@ -148,5 +148,6 @@ with DAG(
 ## 常见问题答疑
 1.git-sync容器启动失败
 > 由于需要访问git仓库，国内机器可能无法访问github，可以选择海外地域进行部署，同时也要注意，git仓库非公开
-> 的情况下，需要提供访问秘钥，需要自行对部署的helm release进行升级修改。
+> 的情况下，需要提供访问秘钥，需要自行对部署的helm release进行升级修改，具体配置方式可以参考
+> [官方values.yaml配置](https://github.com/aliyun-computenest/quickstart-airflow/blob/main/chart/values.yaml)。
 
