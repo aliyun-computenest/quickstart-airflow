@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>Quick Deployment of Airflow on ComputeNest - Aliyun 计算巢 x Demo</title>
+
+  <link rel="shortcut icon" href="../img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="../css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="../search/main.js"></script>
+  
+
+  
+
+  <script src="../js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#quick-deployment-of-airflow-on-computenest">Quick Deployment of Airflow on ComputeNest</a></li>
+              
+                  <li><a href="#overview">Overview</a></li>
+                  
+              
+                  <li><a href="#billing-information">Billing Information</a></li>
+                  
+              
+                  <li><a href="#deployment-architecture">Deployment Architecture</a></li>
+                  
+              
+                  <li><a href="#required-permissions-for-ram-accounts">Required Permissions for RAM Accounts</a></li>
+                  
+              
+                  <li><a href="#deployment-process">Deployment Process</a></li>
+                  
+              
+                  <li><a href="#how-to-use">How to Use</a></li>
+                  
+              
+                  <li><a href="#faq">FAQ</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <h1 id="quick-deployment-of-airflow-on-computenest">Quick Deployment of Airflow on ComputeNest</h1>
+<blockquote>
+<p><strong>Disclaimer:</strong> This service is provided by a third party. We strive to ensure its security, accuracy, and reliability but cannot guarantee it is entirely free from failures, interruptions, errors, or attacks. Therefore, our company hereby disclaims any representations, warranties, or guarantees regarding the content, accuracy, completeness, reliability, suitability, or timeliness of this service. We are not liable for any direct or indirect losses or damages caused by your use of this service. For third-party websites, applications, products, and services accessed through this service, we assume no responsibility for their content, accuracy, completeness, reliability, suitability, or timeliness. You bear all risks and responsibilities arising from the consequences of using this service. We are not liable for any losses or damages, including but not limited to direct losses, indirect losses, lost profits, damaged reputation, data loss, or other economic losses, even if we were previously informed of the possibility of such losses or damages. We reserve the right to modify this disclaimer at any time, so please check it regularly before using this service. If you have any questions or concerns about this disclaimer or this service, please contact us.</p>
+</blockquote>
+<h2 id="overview">Overview</h2>
+<p>Apache Airflow is an open-source workflow management platform used for writing, scheduling, and monitoring workflows. It was initially developed by Airbnb and donated to the Apache Software Foundation in 2016. The core idea of Airflow is to define workflows through code, making workflow management and maintenance more flexible and scalable. For the GitHub community page, see <a href="https://github.com/apache/airflow">link</a>.</p>
+<h2 id="billing-information">Billing Information</h2>
+<p>The cost of deploying Airflow primarily involves:</p>
+<ul>
+<li>Selected vCPU and memory specifications</li>
+<li>System disk type and capacity</li>
+<li>Public network bandwidth</li>
+<li>Kubernetes cluster specifications</li>
+</ul>
+<h2 id="deployment-architecture">Deployment Architecture</h2>
+<p><img src="Architecture.png" width="1500" height="700" align="bottom"/></p>
+<h2 id="required-permissions-for-ram-accounts">Required Permissions for RAM Accounts</h2>
+<p>Deploying Airflow requires access and creation operations for certain Alibaba Cloud resources. Therefore, your account needs to include permissions for the following resources:
+<strong>Note</strong>: These permissions are required only if your account is a RAM account.</p>
+<table>
+<thead>
+<tr>
+<th>Permission Policy Name</th>
+<th>Remarks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AliyunECSFullAccess</td>
+<td>Full access to manage Elastic Compute Service (ECS)</td>
+</tr>
+<tr>
+<td>AliyunVPCFullAccess</td>
+<td>Full access to manage Virtual Private Cloud (VPC)</td>
+</tr>
+<tr>
+<td>AliyunROSFullAccess</td>
+<td>Full access to manage Resource Orchestration Service (ROS)</td>
+</tr>
+<tr>
+<td>AliyunComputeNestUserFullAccess</td>
+<td>User-side permissions for ComputeNest service</td>
+</tr>
+<tr>
+<td>AliyunPostGreSQLFullAccess</td>
+<td>Full access to manage PostgreSQL database services</td>
+</tr>
+<tr>
+<td>AliyunSLBFullAccess</td>
+<td>Full access to manage Server Load Balancer (SLB)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="deployment-process">Deployment Process</h2>
+<ol>
+<li>Visit the Airflow service <a href="https://computenest.console.aliyun.com/service/instance/create/default?type=user&amp;ServiceName=Airflow%E7%A4%BE%E5%8C%BA%E7%89%88">deployment link</a>, and fill in the deployment parameters as prompted. First, set up the container cluster. You can choose to create a new container cluster or deploy to an existing one. Here, we will deploy a new ACK cluster and input the required parameters for creating the ACK cluster:</li>
+</ol>
+<p><img alt="img_2.png" src="../img_2.png" />
+<img alt="img_3.png" src="../img_3.png" /></p>
+<ol>
+<li>
+<p>Next, configure the Git repository that will store DAG files. This service uses a Git repository to store DAG files.
+   <img alt="img_4.png" src="../img_4.png" /></p>
+</li>
+<li>
+<p>Set the username and password for Airflow web login.
+   <img alt="img_5.png" src="../img_5.png" /></p>
+</li>
+<li>
+<p>Configure the network settings for the ACK cluster deployment. You can choose an existing VPC and VSwitch or create a new one.
+   <img alt="img_6.png" src="../img_6.png" /></p>
+</li>
+<li>
+<p>After confirming the order, agree to the service agreement and click <strong>Create Now</strong> to proceed to the deployment phase.</p>
+</li>
+</ol>
+<p><img alt="img_7.png" src="../img_7.png" /></p>
+<ol>
+<li>In the service instance list, you can view the specific deployment progress of the service instance.</li>
+</ol>
+<p><img alt="img.png" src="../3.png" /></p>
+<ol>
+<li>After the deployment is complete, locate the Airflow service link in the console and access it. The initial username and password are the values set during service instance creation.</li>
+</ol>
+<p><img alt="img.png" src="../4.png" />
+<img alt="img_1.png" src="../5.png" />
+<img alt="img_2.png" src="../6.png" /></p>
+<h2 id="how-to-use">How to Use</h2>
+<p>Once the service instance has been deployed, how do we run our defined DAG workflows? This mainly relies on the Git repository for synchronization.
+We can commit the written DAG files to the Git repository prepared during the creation of the service instance. Then, the <code>airflow-scheduler</code> component will synchronize them. On the web interface, you will see the defined DAG files, and you can click the "Run" button to execute the DAG file.</p>
+<p>Below is an example of a simple DAG file to demonstrate how to run a DAG in Airflow.</p>
+<ol>
+<li>Create a DAG file in the Git repository named <code>hello_world_dag.py</code>. It contains three tasks that will be executed sequentially:<ul>
+<li>Print "Hello"</li>
+<li>Print "World"</li>
+<li>Sleep for 300 seconds</li>
+</ul>
+</li>
+</ol>
+<pre><code class="language-python">import time
+from datetime import timedelta
+
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from airflow.utils.dates import days_ago
+
+# Define default arguments
+default_args = {
+    'owner': 'airflow',              # Owner of the DAG
+    'start_date': days_ago(1),       # Start date of the DAG (1 day ago)
+    'retries': 1,                    # Number of retries upon task failure
+    'retry_delay': timedelta(minutes=5),  # Retry interval
+}
+
+# Define the DAG object
+with DAG(
+    dag_id='hello_world_dag',        # Unique identifier for the DAG
+    default_args=default_args,       # Use default arguments
+    schedule_interval='@daily',      # Run once daily
+    catchup=False,                   # Whether to backfill historical tasks
+) as dag:
+
+    # Define the first task: print &quot;Hello&quot;
+    def print_hello():
+        print(&quot;Hello&quot;)
+
+    task_hello = PythonOperator(
+        task_id='print_hello',        # Unique identifier for the task
+        python_callable=print_hello,  # Callable Python function
+    )
+
+    # Define the second task: print &quot;World&quot;
+    def print_world():
+        print(&quot;World&quot;)
+
+    task_world = PythonOperator(
+        task_id='print_world',
+        python_callable=print_world,
+    )
+
+    # Define a sleep task
+    def sleep_task():
+        print(&quot;Task is sleeping for 300 seconds...&quot;)
+        time.sleep(300)  # Sleep for 300 seconds
+        print(&quot;Task woke up!&quot;)
+
+    sleep_operator = PythonOperator(
+        task_id='sleep_task',
+        python_callable=sleep_task,
+    )
+
+    # Set task dependencies
+    task_hello &gt;&gt; task_world &gt;&gt; sleep_operator
+</code></pre>
+<ol>
+<li>
+<p>Commit the DAG file to the Git repository, then check the web interface. You will see the corresponding DAG. Note that there may be a delay in synchronization, which is currently set to occur every 10 seconds.
+   <img alt="img_8.png" src="../img_8.png" /></p>
+</li>
+<li>
+<p>Execute the DAG by clicking the "Run" button. You can view the execution record, and by clicking "Graph," you can see the detailed steps of execution. You will notice that <code>print_hello</code> and <code>print_world</code> have completed execution, while <code>sleep_task</code> is still running. This feature is indeed powerful.
+   <img alt="img_9.png" src="../img_9.png" />
+   <img alt="img_10.png" src="../img_10.png" /></p>
+</li>
+<li>
+<p>Click on the running <code>sleep_task</code>, and in the Logs section, you can see the output information, indicating that it will sleep for 300 seconds. This confirms normal execution.
+   <img alt="img_11.png" src="../img_11.png" /></p>
+</li>
+</ol>
+<p>From the above example, it is clear that Airflow has robust functionality. You can clearly see the execution status of DAGs, with each step displayed graphically. Execution times and logs are also available, making it highly suitable for workflow management.</p>
+<h2 id="faq">FAQ</h2>
+<ol>
+<li>Git-sync container startup failure<blockquote>
+<p>Due to the need to access the Git repository, domestic machines may not be able to access GitHub. You can choose to deploy in overseas regions. Additionally, note that if the Git repository is private, you must provide an access key. You will need to manually upgrade and modify the deployed Helm release. For configuration details, refer to the <a href="https://github.com/aliyun-computenest/quickstart-airflow/blob/main/chart/values.yaml">official values.yaml configuration</a>.</p>
+</blockquote>
+</li>
+</ol>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.6.1
+  Docs Build Date UTC : 2025-06-19 11:34:45.335830+00:00
+  -->
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>Airflow计算巢快速部署 - Aliyun 计算巢 x Demo</title>
+
+  <link rel="shortcut icon" href="img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="search/main.js"></script>
+  
+
+  
+
+  <script src="js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#airflow">Airflow计算巢快速部署</a></li>
+              
+                  <li><a href="#_1">概述</a></li>
+                  
+              
+                  <li><a href="#_2">计费说明</a></li>
+                  
+              
+                  <li><a href="#_3">部署架构</a></li>
+                  
+              
+                  <li><a href="#ram">RAM账号所需权限</a></li>
+                  
+              
+                  <li><a href="#_4">部署流程</a></li>
+                  
+              
+                  <li><a href="#_5">使用方式</a></li>
+                  
+              
+                  <li><a href="#_6">常见问题答疑</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <h1 id="airflow">Airflow计算巢快速部署</h1>
+<blockquote>
+<p><strong>免责声明：</strong>本服务由第三方提供，我们尽力确保其安全性、准确性和可靠性，但无法保证其完全免于故障、中断、错误或攻击。因此，本公司在此声明：对于本服务的内容、准确性、完整性、可靠性、适用性以及及时性不作任何陈述、保证或承诺，不对您使用本服务所产生的任何直接或间接的损失或损害承担任何责任；对于您通过本服务访问的第三方网站、应用程序、产品和服务，不对其内容、准确性、完整性、可靠性、适用性以及及时性承担任何责任，您应自行承担使用后果产生的风险和责任；对于因您使用本服务而产生的任何损失、损害，包括但不限于直接损失、间接损失、利润损失、商誉损失、数据损失或其他经济损失，不承担任何责任，即使本公司事先已被告知可能存在此类损失或损害的可能性；我们保留不时修改本声明的权利，因此请您在使用本服务前定期检查本声明。如果您对本声明或本服务存在任何问题或疑问，请联系我们。</p>
+</blockquote>
+<h2 id="_1">概述</h2>
+<p>Apache Airflow 是一个开源的工作流管理平台，用于编写、调度和监控工作流（Workflows）。它最初由 Airbnb 开发，并于 2016 年捐赠给 Apache 软件基金会。Airflow 的核心理念是通过代码来定义工作流，使得工作流的管理和维护更加灵活和可扩展, github社区地址见<a href="https://github.com/apache/airflow">链接</a>。</p>
+<h2 id="_2">计费说明</h2>
+<p>部署Airflow的费用主要涉及：</p>
+<ul>
+<li>所选vCPU与内存规格</li>
+<li>系统盘类型及容量</li>
+<li>公网带宽</li>
+<li>Kubernetes集群规格</li>
+</ul>
+<h2 id="_3">部署架构</h2>
+<p><img src="Architecture.png" width="1500" height="700" align="bottom"/></p>
+<h2 id="ram">RAM账号所需权限</h2>
+<p>部署Airflow，需要对部分阿里云资源进行访问和创建操作。因此您的账号需要包含如下资源的权限。
+  <strong>说明</strong>：当您的账号是RAM账号时，才需要添加此权限。</p>
+<table>
+<thead>
+<tr>
+<th>权限策略名称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AliyunECSFullAccess</td>
+<td>管理云服务器服务（ECS）的权限</td>
+</tr>
+<tr>
+<td>AliyunVPCFullAccess</td>
+<td>管理专有网络（VPC）的权限</td>
+</tr>
+<tr>
+<td>AliyunROSFullAccess</td>
+<td>管理资源编排服务（ROS）的权限</td>
+</tr>
+<tr>
+<td>AliyunComputeNestUserFullAccess</td>
+<td>管理计算巢服务（ComputeNest）的用户侧权限</td>
+</tr>
+<tr>
+<td>AliyunPostGreSQLFullAccess</td>
+<td>管理云数据库服务（PostGreSQL）的权限</td>
+</tr>
+<tr>
+<td>AliyunSLBFullAccess</td>
+<td>管理负载均衡（SLB）的权限</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_4">部署流程</h2>
+<p>1.访问Airflow服务<a href="https://computenest.console.aliyun.com/service/instance/create/default?type=user&amp;ServiceName=Airflow%E7%A4%BE%E5%8C%BA%E7%89%88">部署链接</a>
+，按提示填写部署参数, 这里先进行容器集群设置，可以选择创建容器集群，也支持已有集群部署，这里新建ACK集群部署, 填入新建ACK集群所需的参数：</p>
+<p><img alt="img_2.png" src="img_2.png" />
+<img alt="img_3.png" src="img_3.png" /></p>
+<p>2.然后设置存放DAG文件的Git仓库配置，本服务采用Git仓库保存DAG文件的方式，这里支持公开和私有
+两种仓库，选择私有仓库时，需要生成accessToken当作访问凭证。
+<img alt="img_4.png" src="img_4.png" /></p>
+<p>3.设置airflow web登录的账号和密码。
+<img alt="img_5.png" src="img_5.png" /></p>
+<p>4.设置ACK集群部署的网络设置，这里可以选择已有的Vpc和VSwitch，也可以选择新建Vpc和VSwitch。
+<img alt="img_6.png" src="img_6.png" /></p>
+<p>5.确认订单完成后同意服务协议并点击<strong>立即创建</strong>进入部署阶段。</p>
+<p><img alt="img_7.png" src="img_7.png" /></p>
+<p>6.在服务实例列表中可以看到服务实例具体部署进度。</p>
+<p><img alt="img.png" src="3.png" /></p>
+<p>7.部署完成后在控制台找到Airflow服务链接并访问, 初始账号、密码为创建服务实例设置的值。</p>
+<p><img alt="img.png" src="4.png" />
+<img alt="img_1.png" src="5.png" />
+<img alt="img_2.png" src="6.png" /></p>
+<h2 id="_5">使用方式</h2>
+<p>上面服务实例已经部署完成，那么怎么运行我们定义好的DAG工作流呢，这里主要依赖git仓库去做同步，
+我们可以把写好的DAG文件提交到创建服务实例时所准备的git仓库中，然后airflow-scheduler组件会进行同步，
+web上就能看到我们定义好的DAG文件，然后点击run按钮就可以运行DAG文件了。</p>
+<p>下面以一个简单的DAG文件为例，展示如何在airflow中进行运行DAG。</p>
+<p>1.在git仓库中创建DAG文件，文件名为<code>hello_world_dag.py</code>，里面有三个任务，会依次执行：
+- 打印"Hello"
+- 打印"World"
+- 休眠300秒</p>
+<pre><code class="language-python">import time
+from datetime import timedelta
+
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from airflow.utils.dates import days_ago
+
+# 定义默认参数
+default_args = {
+    'owner': 'airflow',              # DAG 的所有者
+    'start_date': days_ago(1),       # DAG 的开始时间（1 天前）
+    'retries': 1,                    # 任务失败时的重试次数
+    'retry_delay': timedelta(minutes=5),  # 重试间隔
+}
+
+# 定义 DAG 对象
+with DAG(
+    dag_id='hello_world_dag',        # DAG 的唯一标识符
+    default_args=default_args,       # 使用默认参数
+    schedule_interval='@daily',      # 每天运行一次
+    catchup=False,                   # 是否补跑历史任务
+) as dag:
+
+    # 定义第一个任务：打印 &quot;Hello&quot;
+    def print_hello():
+        print(&quot;Hello&quot;)
+
+    task_hello = PythonOperator(
+        task_id='print_hello',        # 任务的唯一标识符
+        python_callable=print_hello,  # 调用的 Python 函数
+    )
+
+    # 定义第二个任务：打印 &quot;World&quot;
+    def print_world():
+        print(&quot;World&quot;)
+
+    task_world = PythonOperator(
+        task_id='print_world',
+        python_callable=print_world,
+    )
+
+    # 定义一个休眠任务
+    def sleep_task():
+        print(&quot;Task is sleeping for 300 seconds...&quot;)
+        time.sleep(300)  # 休眠 300 秒
+        print(&quot;Task woke up!&quot;)
+
+    sleep_operator = PythonOperator(
+        task_id='sleep_task',
+        python_callable=sleep_task,
+    )
+
+    # 设置任务依赖关系
+    task_hello &gt;&gt; task_world &gt;&gt; sleep_operator
+</code></pre>
+<p>2.提交DAG文件到git仓库中，然后去web端查看，可以看到对应的DAG，这个过程会有延时，目前设置的是每10s同步一次。
+<img alt="img_8.png" src="img_8.png" /></p>
+<p>3.执行这个DAG，点击run按钮，点击进行，可以看到执行记录，点击Graph, 可以看到具体执行步骤，
+可以看到print_hello和print_world都已经执行完了，sleep_task还在执行中，这个功能确实很强大。
+<img alt="img_9.png" src="img_9.png" />
+<img alt="img_10.png" src="img_10.png" />
+4.点击还在执行中的sleep_task，可以在Logs里看到输出信息，里面输出了会sleep 300秒，可见在正常执行。
+<img alt="img_11.png" src="img_11.png" /></p>
+<p>通过上面这个实例，可以看出airflow整体功能还是很强大的，可以清楚的看到DAG的执行情况，并且将每一步的
+执行过程都以图形化的方式显示出来，里面还有执行时间和日志，用来做工作流还是很好用的。</p>
+<h2 id="_6">常见问题答疑</h2>
+<p>1.git-sync容器启动失败</p>
+<blockquote>
+<p>由于需要访问git仓库，国内机器可能无法访问github，可以选择海外地域进行部署，可以自行对部署的helm release进行升级修改，具体配置方式可以参考
+<a href="https://github.com/aliyun-computenest/quickstart-airflow/blob/main/chart/values.yaml">官方values.yaml配置</a>。</p>
+</blockquote>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.6.1
+  Docs Build Date UTC : 2025-06-19 11:34:45.315567+00:00
+  -->
+</body>
+</html>
